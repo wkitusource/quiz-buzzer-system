@@ -1,6 +1,6 @@
-import type { Room, BuzzerEvent } from '../types/game.types.js';
-import { BuzzerLockedError, UnauthorizedError } from '../utils/error-handler.js';
-import { playerService } from './player-service.js';
+import type { BuzzerEvent, Room } from '../types/game.types.js'
+import { BuzzerLockedError, UnauthorizedError } from '../utils/error-handler.js'
+import { playerService } from './player-service.js'
 
 class GameService {
   /**
@@ -10,24 +10,24 @@ class GameService {
   buzz(room: Room, playerId: string): BuzzerEvent {
     // Check if buzzer is already locked
     if (room.buzzerState.isLocked) {
-      throw new BuzzerLockedError();
+      throw new BuzzerLockedError()
     }
 
     // Get the player
-    const player = playerService.getPlayerOrThrow(room, playerId);
+    const player = playerService.getPlayerOrThrow(room, playerId)
 
     // Lock the buzzer
-    const timestamp = new Date();
-    room.buzzerState.isLocked = true;
-    room.buzzerState.lockedBy = playerId;
-    room.buzzerState.lockedAt = timestamp;
+    const timestamp = new Date()
+    room.buzzerState.isLocked = true
+    room.buzzerState.lockedBy = playerId
+    room.buzzerState.lockedAt = timestamp
 
     // Return the buzzer event
     return {
       playerId: player.id,
       username: player.username,
       timestamp,
-    };
+    }
   }
 
   /**
@@ -37,48 +37,53 @@ class GameService {
   resetBuzzer(room: Room, requestingPlayerId: string): void {
     // Only the host can reset the buzzer
     if (requestingPlayerId !== room.hostId) {
-      throw new UnauthorizedError('Only the host can reset the buzzer');
+      throw new UnauthorizedError('Only the host can reset the buzzer')
     }
 
-    room.buzzerState.isLocked = false;
-    room.buzzerState.lockedBy = null;
-    room.buzzerState.lockedAt = null;
+    room.buzzerState.isLocked = false
+    room.buzzerState.lockedBy = null
+    room.buzzerState.lockedAt = null
   }
 
   /**
    * Updates a player's score
    * Only the host can update scores
    */
-  updateScore(room: Room, requestingPlayerId: string, targetPlayerId: string, points: number): void {
+  updateScore(
+    room: Room,
+    requestingPlayerId: string,
+    targetPlayerId: string,
+    points: number
+  ): void {
     // Only the host can update scores
     if (requestingPlayerId !== room.hostId) {
-      throw new UnauthorizedError('Only the host can update scores');
+      throw new UnauthorizedError('Only the host can update scores')
     }
 
-    playerService.updateScore(room, targetPlayerId, points);
+    playerService.updateScore(room, targetPlayerId, points)
   }
 
   /**
    * Checks if the buzzer is locked
    */
   isBuzzerLocked(room: Room): boolean {
-    return room.buzzerState.isLocked;
+    return room.buzzerState.isLocked
   }
 
   /**
    * Gets the player who locked the buzzer
    */
   getBuzzerLockedBy(room: Room): string | null {
-    return room.buzzerState.lockedBy;
+    return room.buzzerState.lockedBy
   }
 
   /**
    * Checks if a player is the host
    */
   isHost(room: Room, playerId: string): boolean {
-    return room.hostId === playerId;
+    return room.hostId === playerId
   }
 }
 
 // Export singleton instance
-export const gameService = new GameService();
+export const gameService = new GameService()

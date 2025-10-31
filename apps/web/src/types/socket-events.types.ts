@@ -1,26 +1,20 @@
-import { z } from 'zod'
+import type { BuzzerEvent, PlayerPublic } from './game.types'
 
-import type { BuzzerEvent, PlayerPublic } from './game.types.js'
+// Client to Server Events Payloads
+export interface CreateRoomPayload {
+  username: string
+  maxPlayers?: number
+}
 
-// Client to Server Events (with Zod validation)
-export const CreateRoomSchema = z.object({
-  username: z.string().min(1).max(50),
-  maxPlayers: z.number().int().min(2).max(20).optional(),
-})
+export interface JoinRoomPayload {
+  roomCode: string
+  username: string
+}
 
-export const JoinRoomSchema = z.object({
-  roomCode: z.string().min(1),
-  username: z.string().min(1).max(50),
-})
-
-export const UpdateScoreSchema = z.object({
-  playerId: z.string(),
-  points: z.number().int(),
-})
-
-export type CreateRoomPayload = z.infer<typeof CreateRoomSchema>
-export type JoinRoomPayload = z.infer<typeof JoinRoomSchema>
-export type UpdateScorePayload = z.infer<typeof UpdateScoreSchema>
+export interface UpdateScorePayload {
+  playerId: string
+  points: number
+}
 
 // Server to Client Events
 export interface ServerToClientEvents {

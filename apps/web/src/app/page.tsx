@@ -1,65 +1,285 @@
-import Image from "next/image";
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
+
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { Modal } from '@/components/ui/modal'
+import { useGame } from '@/contexts/game-context'
 
 export default function Home() {
+  const router = useRouter()
+  const { createRoom, joinRoom, connected } = useGame()
+
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showJoinModal, setShowJoinModal] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  // Create room form
+  const [createUsername, setCreateUsername] = useState('')
+  const [maxPlayers, setMaxPlayers] = useState<number>(10)
+
+  // Join room form
+  const [joinRoomCode, setJoinRoomCode] = useState('')
+  const [joinUsername, setJoinUsername] = useState('')
+
+  const [error, setError] = useState<string | null>(null)
+
+  const handleCreateRoom = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
+
+    try {
+      const response = await createRoom({
+        username: createUsername,
+        maxPlayers,
+      })
+
+      if (response.success && response.roomCode) {
+        router.push(`/room/${response.roomCode}`)
+      } else if (response.error) {
+        setError(response.error)
+      }
+    } catch (err) {
+      console.error(err)
+      setError('Не удалось создать комнату')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleJoinRoom = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
+
+    try {
+      const response = await joinRoom({
+        roomCode: joinRoomCode.toUpperCase(),
+        username: joinUsername,
+      })
+
+      if (response.success) {
+        router.push(`/room/${joinRoomCode.toUpperCase()}`)
+      } else if (response.error) {
+        setError(response.error)
+      }
+    } catch (err) {
+      console.error(err)
+      setError('Не удалось присоединиться к комнате')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      {/* Hero Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mx-auto mb-12 max-w-4xl text-center"
+      >
+        <h1 className="mb-4 text-5xl font-bold text-(--text-primary) sm:text-6xl">
+          Игра Викторина
+        </h1>
+        <p className="mb-8 text-xl text-(--text-secondary)">
+          Система викторины в реальном времени. Будьте первым, кто нажмет кнопку
+          и выиграйте!
+        </p>
+
+        {/* Connection status */}
+        <div className="mb-8 flex items-center justify-center gap-2">
+          <div
+            className={`h-2 w-2 rounded-full ${
+              connected ? 'bg-success' : 'bg-error'
+            }`}
+          />
+          <span className="text-sm text-(--text-secondary)">
+            {connected ? 'Подключено к серверу' : 'Подключение...'}
+          </span>
+        </div>
+      </motion.div>
+
+      {/* Action Cards */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="grid w-full max-w-4xl grid-cols-1 gap-6 md:grid-cols-2"
+      >
+        {/* Create Room Card */}
+        <Card className="transition-shadow hover:shadow-(--shadow-md)">
+          <h2 className="mb-4 text-2xl font-bold text-(--text-primary)">
+            Создать комнату
+          </h2>
+          <p className="mb-6 text-(--text-secondary)">
+            Создайте новую игровую комнату и пригласите друзей присоединиться
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            onClick={() => setShowCreateModal(true)}
+            disabled={!connected}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+            Создать новую комнату
+          </Button>
+        </Card>
+
+        {/* Join Room Card */}
+        <Card className="transition-shadow hover:shadow-(--shadow-md)">
+          <h2 className="mb-4 text-2xl font-bold text-(--text-primary)">
+            Присоединиться
+          </h2>
+          <p className="mb-6 text-(--text-secondary)">
+            Введите код комнаты, чтобы присоединиться к существующей игре
+          </p>
+          <Button
+            variant="secondary"
+            size="lg"
+            fullWidth
+            onClick={() => setShowJoinModal(true)}
+            disabled={!connected}
+          >
+            Присоединиться к комнате
+          </Button>
+        </Card>
+      </motion.div>
+
+      {/* Create Room Modal */}
+      <Modal
+        isOpen={showCreateModal}
+        onClose={() => {
+          setShowCreateModal(false)
+          setError(null)
+        }}
+        title="Создать комнату"
+      >
+        <form onSubmit={handleCreateRoom} className="space-y-4">
+          <Input
+            label="Ваше имя"
+            placeholder="Введите ваше имя"
+            value={createUsername}
+            onChange={(e) => setCreateUsername(e.target.value)}
+            required
+            fullWidth
+            maxLength={50}
+          />
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-(--text-primary)">
+              Максимум игроков (необязательно)
+            </label>
+            <Input
+              type="number"
+              placeholder="10"
+              value={maxPlayers}
+              onChange={(e) => setMaxPlayers(parseInt(e.target.value) || 10)}
+              min={2}
+              max={20}
+              fullWidth
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/8 px-5 transition-colors hover:border-transparent hover:bg-black/8 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          </div>
+
+          {error && (
+            <p className="text-error rounded bg-(--error-light) p-3 text-sm">
+              {error}
+            </p>
+          )}
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                setShowCreateModal(false)
+                setError(null)
+              }}
+              disabled={loading}
+              fullWidth
+            >
+              Отмена
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={!createUsername.trim() || loading}
+              fullWidth
+            >
+              {loading ? <LoadingSpinner size="sm" /> : 'Создать комнату'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Join Room Modal */}
+      <Modal
+        isOpen={showJoinModal}
+        onClose={() => {
+          setShowJoinModal(false)
+          setError(null)
+        }}
+        title="Присоединиться"
+      >
+        <form onSubmit={handleJoinRoom} className="space-y-4">
+          <Input
+            label="Код комнаты"
+            placeholder="Введите 6-значный код"
+            value={joinRoomCode}
+            onChange={(e) => setJoinRoomCode(e.target.value.toUpperCase())}
+            required
+            fullWidth
+            maxLength={6}
+            className="font-mono uppercase"
+          />
+
+          <Input
+            label="Ваше имя"
+            placeholder="Введите ваше имя"
+            value={joinUsername}
+            onChange={(e) => setJoinUsername(e.target.value)}
+            required
+            fullWidth
+            maxLength={50}
+          />
+
+          {error && (
+            <p className="text-error rounded bg-(--error-light) p-3 text-sm">
+              {error}
+            </p>
+          )}
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                setShowJoinModal(false)
+                setError(null)
+              }}
+              disabled={loading}
+              fullWidth
+            >
+              Отмена
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={!joinRoomCode.trim() || !joinUsername.trim() || loading}
+              fullWidth
+            >
+              {loading ? <LoadingSpinner size="sm" /> : 'Присоединиться'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
-  );
+  )
 }

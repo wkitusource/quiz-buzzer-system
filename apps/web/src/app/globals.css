@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Claude-inspired color palette */
+  --background: #f5f5f0;
+  --foreground: #2d2d2d;
+  --surface: #ffffff;
+  --surface-hover: #f9f9f7;
+  --border: #e8e8e3;
+  --border-hover: #d4d4cc;
+
+  /* Accent colors */
+  --accent: #d4a373;
+  --accent-hover: #c49461;
+  --accent-light: #f0e5d8;
+
+  /* Semantic colors */
+  --success: #6b9e78;
+  --success-light: #e8f3eb;
+  --error: #d4756f;
+  --error-light: #f8e8e7;
+  --warning: #e6b84f;
+  --warning-light: #fdf5e6;
+
+  /* Text colors */
+  --text-primary: #2d2d2d;
+  --text-secondary: #6b6b6b;
+  --text-tertiary: #999999;
+  --text-inverse: #ffffff;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.08);
+
+  /* Animation timing */
+  --transition-fast: 150ms;
+  --transition-normal: 200ms;
+  --transition-slow: 300ms;
+
+  /* Spacing scale */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Border radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-full: 9999px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1a1a1a;
+    --foreground: #ededed;
+    --surface: #2d2d2d;
+    --surface-hover: #383838;
+    --border: #404040;
+    --border-hover: #4d4d4d;
+
+    --accent: #d4a373;
+    --accent-hover: #e5b584;
+    --accent-light: #3d3429;
+
+    --success: #6b9e78;
+    --success-light: #273529;
+    --error: #d4756f;
+    --error-light: #3d2927;
+    --warning: #e6b84f;
+    --warning-light: #3d3529;
+
+    --text-primary: #ededed;
+    --text-secondary: #a8a8a8;
+    --text-tertiary: #808080;
+    --text-inverse: #1a1a1a;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.4);
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+/* Remove default button styles */
+button {
+  font-family: inherit;
+  line-height: inherit;
+}
+
+/* Smooth transitions for color scheme changes */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: ease-in-out;
+  transition-duration: var(--transition-fast);
+}
+
+/* Respect user preferences for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
