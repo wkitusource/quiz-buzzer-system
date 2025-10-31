@@ -12,6 +12,8 @@ import type {
 
 // Configuration
 const PORT = process.env.PORT || 3001
+// CLIENT_URL kept for potential future use (currently not used for CORS as all origins are allowed)
+// @ts-ignore - Variable kept for potential future use
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000'
 
 // Create Express app
@@ -20,7 +22,7 @@ const app = express()
 // Middleware
 app.use(
   cors({
-    origin: CLIENT_URL,
+    origin: true,
     credentials: true,
   })
 )
@@ -51,7 +53,7 @@ const io = new Server<
   SocketData
 >(httpServer, {
   cors: {
-    origin: CLIENT_URL,
+    origin: '*',
     credentials: true,
   },
 })
@@ -67,7 +69,7 @@ httpServer.listen(PORT, () => {
   console.log(`📡  Server running on port ${PORT}`)
   console.log(`🔗  HTTP: http://localhost:${PORT}`)
   console.log(`🔌  WebSocket: ws://localhost:${PORT}`)
-  console.log(`🌐  CORS enabled for: ${CLIENT_URL}`)
+  console.log(`🌐  CORS enabled for: all origins`)
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
 })
 
