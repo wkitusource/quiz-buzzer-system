@@ -1,135 +1,117 @@
-# Turborepo starter
+# Quiz Buzzer System
 
-This Turborepo starter is maintained by the Turborepo core team.
+Монорепозиторий для системы викторины с мгновенным «баззером», построенной на Express + Socket.IO (API) и Next.js (клиент). Проект позволяет ведущему создавать игровые комнаты, участникам — подключаться и соревноваться за право ответить первым.
 
-## Using this example
+## Ключевые возможности
 
-Run the following command:
+- Создание и подключение к комнатам по короткому коду
+- Управление игроками: список участников, назначение ведущего
+- Блокировка «баззера» при первом нажатии, отображение победителя
+- Управление очками ведущим, синхронизация результатов между клиентами
+- Интуитивный веб-интерфейс с анимациями и звуковыми эффектами
+- API на Socket.IO с валидацией данных через Zod
+
+## Структура монорепозитория
+
+- `apps/api` — сервер Express + Socket.IO, хранит игровое состояние в памяти, предоставляет события для клиентов
+- `apps/web` — Next.js 16 App Router (React 19), UI для ведущего и игроков
+- `packages` — зарезервировано под общие библиотеки (пока пусто)
+- `turbo.json` — настройки задач Turborepo
+- `pnpm-workspace.yaml` — конфигурация рабочих пространств pnpm
+
+```text
+quiz-buzzer-system
+├─ apps/
+│  ├─ api/           # Сервер Socket.IO, доменные сервисы и типы
+│  └─ web/           # Клиент Next.js, компоненты и хуки
+├─ packages/         # Будущие общие модули
+├─ turbo.json        # Конвейеры build/dev/lint/check-types
+├─ pnpm-workspace.yaml
+└─ README.md
+```
+
+## Требования
+
+- Node.js 18 или новее
+- pnpm 9.x (указано в `packageManager`)
+
+## Установка
 
 ```sh
-npx create-turbo@latest
+pnpm install
 ```
 
-## What's inside?
+После установки зависимостей настройте переменные окружения.
 
-This Turborepo includes the following packages/apps:
+## Настройка окружения
 
-### Apps and Packages
+- `apps/api/.env` (создайте при необходимости):
+  - `PORT=3001` — порт API
+  - `CLIENT_URL=http://localhost:3000` — адрес фронтенда для CORS
+- `apps/web/.env.local` (опционально):
+  - `NEXT_PUBLIC_API_URL=http://localhost:3001` — базовый URL API/Socket.IO (используется в клиенте через `socket.io-client`)
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## Команды разработки
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- `pnpm dev` — запустить одновременно API (`tsx watch`) и веб-интерфейс (Next.js dev)
+- `pnpm --filter api dev` — только API на `http://localhost:3001`
+- `pnpm --filter web dev` — только веб-приложение на `http://localhost:3000`
 
-### Utilities
+Во время разработки Turborepo отключает кэш и держит процессы активными (`persistent: true`).
 
-This Turborepo has some additional tools already setup for you:
+## Сборка и запуск
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+- `pnpm build` — собрать все рабочие пространства
+- `pnpm --filter api build` — скомпилировать TypeScript API в `apps/api/dist`
+- `pnpm --filter web build` — собрать Next.js в `apps/web/.next`
+- `pnpm --filter api start` — запустить готовый API из `dist`
+- `pnpm --filter web start` — production-сервер Next.js
 
-### Build
+## Проверка качества
 
-To build all apps and packages, run the following command:
+- `pnpm lint` — запустить ESLint для всех пакетов
+- `pnpm format` — применить Prettier (`**/*.{ts,tsx,md}`)
+- `pnpm check-types` — прогнать `tsc --noEmit` для зависимых пакетов (API поддерживается из коробки)
+- Тесты пока не реализованы. При добавлении рекомендуется использовать Vitest + supertest для API и React Testing Library / Playwright для веба (см. `CLAUDE.md`).
 
-```
-cd my-turborepo
+## API и события Socket.IO
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+HTTP:
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+- `GET /health` — проверка состояния сервера
+- `GET /` — метаданные API (`name`, `version`, `status`)
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+Основное взаимодействие происходит через события Socket.IO (`apps/api/src/handlers/socket-handlers.ts`):
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+- `create-room` — создать комнату (возвращает `roomId`, `roomCode`, `playerId`)
+- `join-room` — присоединиться по коду комнаты
+- `buzz` — зафиксировать нажатие игрока; блокирует «баззер» для остальных
+- `reset-buzzer` — доступно только ведущему, снимает блокировку
+- `update-score` — ведущий изменяет очки игрока
+- `leave-room` — выйти из комнаты; также вызывается при отключении
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+Сервер отправляет обновления: `player-list-updated`, `player-joined`, `player-left`, `player-buzzed`, `buzzer-reset`, `score-updated`, а также ошибки (`error`).
 
-### Develop
+## Клиентское приложение
 
-To develop all apps and packages, run the following command:
+- UI построен на React 19 и App Router Next.js 16
+- Состояние игры инкапсулировано в `GameProvider` (`apps/web/src/contexts/game-context.tsx`)
+- Подключение к серверу через `socket.io-client` (см. `apps/web/src/lib/socket.ts` и хук `useSocket`)
+- Звуки и анимации (Framer Motion, `use-sound`) повышают вовлеченность
+- Поддерживаются сценарии ведущего и игрока: создание/вход, отображение списка, управление очками, оповещения о событиях
 
-```
-cd my-turborepo
+## Как внести вклад
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+1. Форкните репозиторий или создайте ветку.
+2. Выполните `pnpm install` и настройте переменные окружения.
+3. Разрабатывайте через `pnpm dev`. Перед пушем проверьте `pnpm lint`, `pnpm check-types`, `pnpm format`.
+4. Придерживайтесь Conventional Commits (`feat(api): ...`, `fix(web): ...`).
+5. Добавляйте тесты рядом с кодом (`apps/api/src/services/__tests__/`, `apps/web/src/app/__tests__/`). Обновите `turbo.json` и скрипты `test` при необходимости.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+## Полезные ссылки
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+- Turborepo — https://turbo.build
+- Next.js — https://nextjs.org
+- Socket.IO — https://socket.io
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+Если возникнут вопросы или потребуется уточнить архитектуру, изучите `CLAUDE.md`, где собраны дополнительные рекомендации по развитию проекта.
