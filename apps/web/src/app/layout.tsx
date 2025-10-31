@@ -1,18 +1,16 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Inter } from 'next/font/google'
 
 import './globals.css'
 
 import { GameProvider } from '@/contexts/game-context'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-})
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+const inter = Inter({
+  subsets: ['latin', 'cyrillic'],
+  display: 'swap',
+  variable: '--font-inter',
+  weight: 'variable',
+  axes: ['opsz'],
 })
 
 export const metadata: Metadata = {
@@ -31,23 +29,6 @@ export const metadata: Metadata = {
     'тривия',
     'игровое шоу',
   ],
-  authors: [{ name: 'Команда Игры Викторина' }],
-  openGraph: {
-    title: 'Игра Викторина',
-    description: 'Система викторины в реальном времени',
-    type: 'website',
-    locale: 'ru_RU',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Игра Викторина',
-    description: 'Система викторины в реальном времени',
-  },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
 }
 
 export default function RootLayout({
@@ -57,9 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={inter.variable}>
         <GameProvider>{children}</GameProvider>
       </body>
     </html>
