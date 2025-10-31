@@ -6,10 +6,8 @@ import { motion } from 'framer-motion'
 
 import { BuzzerButton } from '@/components/game/buzzer-button'
 import { HostControls } from '@/components/game/host-controls'
-import { Leaderboard } from '@/components/game/leaderboard'
 import { PlayerList } from '@/components/game/player-list'
 import { RoomHeader } from '@/components/game/room-header'
-import { Scoreboard } from '@/components/game/scoreboard'
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { useGame } from '@/contexts/game-context'
@@ -20,7 +18,6 @@ export default function RoomPage() {
   const roomCode = (params.code as string)?.toUpperCase()
 
   const { roomId, leaveRoom, connected, buzz, buzzerLocked } = useGame()
-  const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const onLoadingComplete = useEffectEvent(() => {
@@ -61,9 +58,6 @@ export default function RoomPage() {
         return
       }
 
-      // Only trigger in game view (not leaderboard)
-      if (showLeaderboard) return
-
       // Only trigger if connected and buzzer not locked
       if (!connected || buzzerLocked) return
 
@@ -76,7 +70,7 @@ export default function RoomPage() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [roomId, showLeaderboard, connected, buzzerLocked, buzz])
+  }, [roomId, connected, buzzerLocked, buzz])
 
   const handleLeaveRoom = () => {
     leaveRoom()
@@ -120,70 +114,43 @@ export default function RoomPage() {
 
       {/* Main Content */}
       <div className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6 lg:p-8">
-        {showLeaderboard ? (
-          /* Leaderboard View */
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          {/* Left Sidebar - Player List */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="lg:col-span-3"
+          >
+            <PlayerList />
+          </motion.div>
+
+          {/* Center - Buzzer */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="py-8"
+            transition={{ delay: 0.1 }}
+            className="flex flex-col items-center justify-center py-12 lg:col-span-6"
           >
-            <div className="mb-4 flex justify-end">
-              <Button
-                variant="secondary"
-                onClick={() => setShowLeaderboard(false)}
-              >
-                Вернуться к игре
+            <BuzzerButton />
+
+            {/* Action Buttons */}
+            <div className="mt-8 flex gap-3">
+              <Button variant="ghost" onClick={handleLeaveRoom}>
+                Покинуть комнату
               </Button>
             </div>
-            <Leaderboard />
           </motion.div>
-        ) : (
-          /* Game View */
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            {/* Left Sidebar - Player List */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="lg:col-span-3"
-            >
-              <PlayerList />
-            </motion.div>
 
-            {/* Center - Buzzer */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="flex flex-col items-center justify-center py-12 lg:col-span-6"
-            >
-              <BuzzerButton />
-
-              {/* Action Buttons */}
-              <div className="mt-8 flex gap-3">
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowLeaderboard(true)}
-                >
-                  Таблица лидеров
-                </Button>
-                <Button variant="ghost" onClick={handleLeaveRoom}>
-                  Покинуть комнату
-                </Button>
-              </div>
-            </motion.div>
-
-            {/* Right Sidebar - Scoreboard and Host Controls */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="space-y-6 lg:col-span-3"
-            >
-              <Scoreboard />
-              <HostControls />
-            </motion.div>
-          </div>
-        )}
+          {/* Right Sidebar - Host Controls */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="lg:col-span-3"
+          >
+            <HostControls />
+          </motion.div>
+        </div>
       </div>
 
       {/* Connection Lost Warning */}

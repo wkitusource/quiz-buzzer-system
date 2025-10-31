@@ -43,7 +43,7 @@ export function BuzzerButton() {
             ? isLockedByMe
               ? 'bg-success focus:ring-success text-white shadow-lg'
               : 'cursor-not-allowed bg-gray-400 text-gray-600 opacity-60'
-            : 'bg-accent focus:ring-accent cursor-pointer text-white shadow-xl hover:shadow-2xl'
+            : 'bg-pink focus:ring-pink cursor-pointer text-white shadow-xl hover:shadow-2xl'
         } disabled:cursor-not-allowed disabled:opacity-60`}
         aria-label="Кнопка ответа"
       >
@@ -60,7 +60,7 @@ export function BuzzerButton() {
         {/* Pulse animation when unlocked */}
         {!buzzerLocked && connected && (
           <motion.div
-            className="bg-accent absolute inset-0 rounded-full"
+            className="bg-pink absolute inset-0 rounded-full"
             animate={{
               scale: [1, 1.1, 1],
               opacity: [0.5, 0.2, 0.5],
@@ -77,16 +77,25 @@ export function BuzzerButton() {
       {/* Status text */}
       <div className="text-center">
         {buzzerLocked && lastBuzzer && !isLockedByMe && (
-          <p className="text-lg font-medium text-(--text-primary)">
-            <span className="text-accent">{lastBuzzer.username}</span> нажал
-            первым!
-          </p>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', duration: 0.5 }}
+            className="bg-success/10 border-success rounded-2xl border-2 px-8 py-6"
+          >
+            <p className="text-4xl font-bold text-(--text-primary)">
+              <span className="text-success">{lastBuzzer.username}</span>
+            </p>
+            <p className="text-2xl font-semibold text-(--text-primary) mt-2">
+              нажал первым!
+            </p>
+          </motion.div>
         )}
         {!connected && (
-          <p className="text-error text-sm">Отключено от сервера</p>
+          <p className="text-error text-lg">Отключено от сервера</p>
         )}
         {!buzzerLocked && connected && (
-          <p className="text-sm text-(--text-secondary)">
+          <p className="text-lg text-(--text-secondary)">
             Нажмите кнопку или клавишу{' '}
             <kbd className="bg-surface border-border rounded border px-2 py-1 font-mono text-xs">
               Пробел

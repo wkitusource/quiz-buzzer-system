@@ -54,9 +54,6 @@ export function PlayerList() {
                         Ведущий
                       </Badge>
                     )}
-                    <span className="font-mono text-sm text-(--text-secondary)">
-                      {player.score} очк.
-                    </span>
                   </div>
                 </div>
               </div>

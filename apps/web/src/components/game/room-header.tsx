@@ -24,19 +24,6 @@ export function RoomHeader() {
     }
   }
 
-  const handleCopyLink = async () => {
-    if (!roomCode) return
-
-    try {
-      const url = `${window.location.origin}/room/${roomCode}`
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (error) {
-      console.error('Failed to copy link:', error)
-    }
-  }
-
   return (
     <div className="bg-surface border-border border-b shadow-(--shadow-sm)">
       <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
@@ -91,14 +78,6 @@ export function RoomHeader() {
                 disabled={!roomCode}
               >
                 {copied ? 'Скопировано!' : 'Скопировать код'}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleCopyLink}
-                disabled={!roomCode}
-              >
-                Поделиться ссылкой
               </Button>
             </div>
           </div>

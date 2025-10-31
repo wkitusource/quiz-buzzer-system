@@ -19,9 +19,14 @@
   --accent-hover: #c49461;
   --accent-light: #f0e5d8;
 
+  /* Pink for buzzer waiting state */
+  --pink: #ec4899;
+  --pink-hover: #db2777;
+  --pink-light: #fce7f3;
+
   /* Semantic colors */
-  --success: #6b9e78;
-  --success-light: #e8f3eb;
+  --success: #22c55e;
+  --success-light: #dcfce7;
   --error: #d4756f;
   --error-light: #f8e8e7;
   --warning: #e6b84f;
@@ -70,8 +75,12 @@
     --accent-hover: #e5b584;
     --accent-light: #3d3429;
 
-    --success: #6b9e78;
-    --success-light: #273529;
+    --pink: #ec4899;
+    --pink-hover: #f472b6;
+    --pink-light: #500724;
+
+    --success: #22c55e;
+    --success-light: #14532d;
     --error: #d4756f;
     --error-light: #3d2927;
     --warning: #e6b84f;
@@ -94,6 +103,7 @@
   --color-surface: var(--surface);
   --color-border: var(--border);
   --color-accent: var(--accent);
+  --color-pink: var(--pink);
   --color-success: var(--success);
   --color-error: var(--error);
   --color-warning: var(--warning);
